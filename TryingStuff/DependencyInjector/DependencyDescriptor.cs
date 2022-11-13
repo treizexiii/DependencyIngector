@@ -1,4 +1,4 @@
-﻿namespace TryingStuff;
+﻿namespace TryingStuff.DependencyInjector;
 
 public class DependencyDescriptor
 {

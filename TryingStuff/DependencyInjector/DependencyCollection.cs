@@ -1,6 +1,4 @@
-using System.Reflection;
-
-namespace TryingStuff;
+namespace TryingStuff.DependencyInjector;
 
 public class DependencyCollection
 {
