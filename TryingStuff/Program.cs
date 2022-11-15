@@ -8,16 +8,21 @@ Console.WriteLine("Hello, World!");
 
 var services = DependencyServiceBuilder.Build();
 
-// services.RegisterSingleton<IRandomGuidGenerator, RandomGuidGenerator>();
+services.RegisterSingleton<IRandomGuidGenerator, RandomGuidGenerator>();
 services.RegisterTransient<RandomGuidGenerator>();
 
 var container = services.GenerateContainer();
 
-var service1 = container.GetService<RandomGuidGenerator>();
-var service2 = container.GetService<RandomGuidGenerator>();
+var serviceA1 = container.GetService<RandomGuidGenerator>();
+var serviceA2 = container.GetService<RandomGuidGenerator>();
+var serviceB1 = container.GetService<IRandomGuidGenerator>();
+var serviceB2 = container.GetService<IRandomGuidGenerator>();
 
-Console.WriteLine(service1.RandomGuid.ToString());
-Console.WriteLine(service2.RandomGuid.ToString());
+Console.WriteLine(serviceA1.RandomGuid.ToString());
+Console.WriteLine(serviceA2.RandomGuid.ToString());
+
+Console.WriteLine(serviceB1.RandomGuid.ToString());
+Console.WriteLine(serviceB2.RandomGuid.ToString());
 
 Console.ReadKey();
 
