@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace TryingStuff.DependencyInjector;
 
-public class DependencyContainer
+internal class DependencyContainer : IDependencyContainer
 {
     private readonly IEnumerable<DependencyDescriptor> _descriptors;
 
@@ -10,7 +10,7 @@ public class DependencyContainer
     {
         _descriptors = descriptors;
     }
-    
+
     public TInterface GetService<TInterface>()
     {
         var type = typeof(TInterface);
@@ -23,29 +23,32 @@ public class DependencyContainer
             if (dependencyDescriptor.Instance == null)
             {
                 dependencyDescriptor.Instance =
-                    BuildInstance<TInterface>(dependencyDescriptor.Implementation);
+                    BuildInstance<TInterface>(dependencyDescriptor.Implementation, dependencyDescriptor.Parameters);
             }
 
             return (TInterface)dependencyDescriptor.Instance!;
         }
 
-        return BuildInstance<TInterface>(dependencyDescriptor.Implementation);
+        return BuildInstance<TInterface>(dependencyDescriptor.Implementation, dependencyDescriptor.Parameters);
     }
-    
-    private TInterface BuildInstance<TInterface>(Type implementation)
-    {
-        var constructor = FindConstructor(implementation);
-        if (constructor == null)
-            throw new Exception("Could not find a constructor for type " + implementation);
 
-        var parameterInstances = ParameterInstances(constructor);
+    private TInterface BuildInstance<TInterface>(Type implementation, object[] parameters)
+    {
+        object?[] parameterInstances = parameters;
+        if (parameterInstances.Length == 0)
+        {
+            var constructor = FindConstructor(implementation);
+            if (constructor == null)
+                throw new Exception("Could not find a constructor for type " + implementation);
+            parameterInstances = ParameterInstances(constructor);
+        }
 
         var instance = (TInterface)Activator.CreateInstance(implementation, parameterInstances)!;
         if (instance == null)
             throw new Exception("Could not create instance of type " + implementation);
         return instance;
     }
-    
+
     private ConstructorInfo? FindConstructor(Type implementation)
     {
         var constructors = implementation.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
@@ -54,7 +57,8 @@ public class DependencyContainer
             var parameters = c.GetParameters();
             foreach (var param in parameters)
             {
-                if (!param.ParameterType.IsInterface && _descriptors.Any(d => d.Interface == param.ParameterType) == false)
+                if (!param.ParameterType.IsInterface &&
+                    _descriptors.Any(d => d.Interface == param.ParameterType) == false)
                     return false;
             }
 

@@ -1,39 +1,53 @@
 namespace TryingStuff.DependencyInjector;
 
-public class DependencyCollection
+internal class DependencyCollection : IDependencyCollection
 {
-    private readonly List<DependencyDescriptor> _dependencies = new();
+    private readonly List<DependencyDescriptor> _dependencies;
 
-    public void RegisterTransient<TInterface, TImplementation>()
+    public DependencyCollection()
     {
-        var service = RegistrationControls<TInterface, TImplementation>();
-
-        var dependencyDescriptor = new DependencyDescriptor(
-            service.Item1,
-            service.Item2, 
-            null,
-            LifeTime.transient);
-        _dependencies.Add(dependencyDescriptor);
+        _dependencies = new List<DependencyDescriptor>();
     }
 
-    public void RegisterSingleton<TInterface, TImplementation>()
-    {
-        var service = RegistrationControls<TInterface, TImplementation>();
-        
-        var dependencyDescriptor = new DependencyDescriptor(
-            service.Item1, 
-            service.Item2, 
-            null, 
-            LifeTime.singleton);
-        _dependencies.Add(dependencyDescriptor);
-    }
-    
-    public DependencyContainer GenerateContainer()
+    public IDependencyContainer GenerateContainer()
     {
         var container = new DependencyContainer(_dependencies);
         return container;
     }
     
+    public void RegisterTransient<TImplementation>(params object[] parameters)
+    {
+        RegisterService(typeof(TImplementation), typeof(TImplementation), LifeTime.transient, parameters);
+    }
+    
+    public void RegisterTransient<TInterface, TImplementation>(params object[] parameters)
+    {
+        var service = RegistrationControls<TInterface, TImplementation>();
+        RegisterService(service.Item1, service.Item2, LifeTime.transient, parameters);
+    }
+    
+    public void RegisterSingleton<TImplementation>(params object[] parameters)
+    {
+        RegisterService(typeof(TImplementation), typeof(TImplementation), LifeTime.singleton, parameters);
+    }
+
+    public void RegisterSingleton<TInterface, TImplementation>(params object[] parameters)
+    {
+        var service = RegistrationControls<TInterface, TImplementation>();
+        RegisterService(service.Item1, service.Item2, LifeTime.singleton, parameters);
+    }
+
+    private void RegisterService(Type serviceType, Type serviceImplementation, LifeTime lifeTime, object[] parameters)
+    {
+        var dependencyDescriptor = new DependencyDescriptor(
+            serviceType,
+            serviceImplementation,
+            null,
+            lifeTime,
+            parameters);
+        _dependencies.Add(dependencyDescriptor);
+    }
+
     private (Type, Type) RegistrationControls<TInterface, TImplementation>()
     {
         var interfaceType = typeof(TInterface);

@@ -2,14 +2,16 @@
 
 internal class CachedObject
 {
-    public CachedObject(string reference, object? o)
+    public CachedObject(string reference, object o)
     {
         Reference = reference;
         Obj = o;
+        Type = o.GetType();
     }
 
-    public string Reference { get; set; }
-    public object? Obj { get; set; }
+    public string Reference { get; }
+    public Type Type { get; }
+    public object? Obj { get; }
 }
 
 internal class MemoryCache : IMemoryCache
@@ -39,17 +41,17 @@ internal class MemoryCache : IMemoryCache
         }
     }
 
-    public object? GetObject<T>(string reference)
+    public T? GetObject<T>(string reference)
     {
         for (int i = 0; i < _memorySize; i++)
         {
             if (_cache[i].Reference == reference)
             {
-                return (T)_cache[i].Obj!;
+                return (T)_cache[i].Obj! ;
             }
         }
 
-        return null;
+        return default;
     }
 
     public void RemoveFromCache(string reference)
