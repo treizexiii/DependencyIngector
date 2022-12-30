@@ -3,8 +3,28 @@
 using TryingStuff;
 using TryingStuff.DependencyInjector;
 using TryingStuff.Memory;
+using TryingStuff.StateMachine;
 
 Console.WriteLine("Hello, World!");
+
+var machine = new StateMachineBuilder()
+    .WithInitialState("A")
+    .WithTransition("A", "B", "1")
+    .WithTransition("A", "C", "0")
+    .WithTransition("B", "C", "0")
+    .WithTransition("B", "A", "1")
+    .WithTransition("C", "A", "1")
+    .WithTransition("C", "B", "0")
+    .Build();
+
+Console.WriteLine(machine.CurrentState.Name);
+machine.Process("0");
+Console.WriteLine(machine.CurrentState.Name);
+machine.Process("0");
+Console.WriteLine(machine.CurrentState.Name);
+machine.Process("1");
+Console.WriteLine(machine.CurrentState.Name);
+
 
 var services = DependencyServiceBuilder.Build();
 

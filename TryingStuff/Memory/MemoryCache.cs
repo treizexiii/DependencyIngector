@@ -47,7 +47,7 @@ internal class MemoryCache : IMemoryCache
         {
             if (_cache[i].Reference == reference)
             {
-                return (T)_cache[i].Obj! ;
+                return (T)_cache[i].Obj!;
             }
         }
 
